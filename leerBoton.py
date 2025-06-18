@@ -1,49 +1,44 @@
 # leerBoton.py
-# Módulo para leer botones conectados a la Raspberry Pi usando RPi.GPIO
-
-import RPi.GPIO as GPIO
+"""
+Módulo para leer botones desde RedBearLab Blend Micro v1 conectado por USB.
+El microcontrolador envía por serial el nombre del botón presionado (UP, DOWN, LEFT, RIGHT, A, B, MENU) seguido de '\n'.
+"""
+import serial
 import time
 
-# Asignación de pines BCM para cada botón
-BUTTON_PINS = {
-    'UP': 9,
-    'DOWN': 10,
-    'LEFT': 11,
-    'RIGHT': 12,
-    'A': 13,
-    'B': 14,
-    'MENU': 15
-}
+# Configuración del puerto serial (ajusta según tu sistema, p.ej. '/dev/ttyACM0' o '/dev/ttyUSB0')
+SERIAL_PORT = '/dev/ttyACM0'
+BAUDRATE = 9600
 
-# Configuración inicial de GPIO
-GPIO.setmode(GPIO.BCM)
-for name, pin in BUTTON_PINS.items():
-    GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-
-# Tiempo de rebote en segundos
-_DEBOUNCE_TIME = 0.02
+# Inicializa conexión serial
+try:
+    ser = serial.Serial(SERIAL_PORT, BAUDRATE, timeout=0.1)
+    time.sleep(2)  # espera inicial para estabilizar conexión
+except serial.SerialException as e:
+    raise RuntimeError(f"No se pudo abrir el puerto serial {SERIAL_PORT}: {e}")
 
 
 def leer_boton():
     """
-    Revisa el estado de los botones y retorna el nombre del primer botón presionado.
-    Si no hay ningún botón presionado, retorna None.
+    Lee una línea del serial. Si el microcontrolador envía un nombre de botón,
+    retorna ese string; en caso contrario retorna None.
     """
-    for name, pin in BUTTON_PINS.items():
-        # Botón conectado a GND, nivel bajo indica presión
-        if GPIO.input(pin) == GPIO.LOW:
-            # Debounce: esperar un corto periodo y verificar nuevamente
-            time.sleep(_DEBOUNCE_TIME)
-            if GPIO.input(pin) == GPIO.LOW:
-                # Esperar hasta que el usuario suelte el botón
-                while GPIO.input(pin) == GPIO.LOW:
-                    time.sleep(0.01)
-                return name
-    return None
+    try:
+        raw = ser.readline()
+        if not raw:
+            return None
+        btn = raw.decode('utf-8', errors='ignore').strip()
+        return btn if btn in {'UP','DOWN','LEFT','RIGHT','A','B','MENU'} else None
+    except Exception:
+        return None
 
 
 def cleanup():
     """
-    Limpia la configuración de GPIO. Usar al finalizar el programa si se desea.
+    Cierra el puerto serial. Llamar al terminar el programa.
     """
-    GPIO.cleanup()
+    try:
+        ser.close()
+    except Exception:
+        pass
+
