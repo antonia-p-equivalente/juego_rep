@@ -14,7 +14,7 @@ def main():
     # Lista de juegos: (etiqueta, ruta_relativa_al_script)
     games = [
         ("juego1", os.path.join("anathema", "anathema_adaptado_botones.py", "setup.py")),
-        ("juego2", os.path.join("juego2", "juego2.py"))
+        ("juego2", "juego2.py")
     ]
     current = 0
 
