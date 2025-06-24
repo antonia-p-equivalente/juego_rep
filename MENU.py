@@ -1,72 +1,53 @@
-# menu.py
 import pygame
 import subprocess
-import os
-from leerBoton import leer_boton
+import sys
 
+pygame.init()
+screen = pygame.display.set_mode((480, 240))
+pygame.display.set_caption("Menú de Juegos")
 
-def main():
-    pygame.init()
-    screen = pygame.display.set_mode((480, 320))
-    pygame.display.set_caption("Menú de Juegos")
-    font = pygame.font.Font(None, 50)
+font = pygame.font.SysFont("Arial", 50)
+clock = pygame.time.Clock()
 
-    # Lista de juegos: (etiqueta, ruta_relativa_al_script)
-    games = [
-        ("juego1", os.path.join("anathema", "anathema_adaptado_botones.py", "setup.py")),
-        ("juego2", os.path.join("juego2", "juego2.py"))
-    ]
-    current = 0
+juegos = [
+    {"nombre": "juego1", "path": "anathema/anathema_adaptado_botones.py"},
+    {"nombre": "juego2", "path": "juego2/juego2.py"},
+]
 
-    def draw_menu():
-        screen.fill((0, 0, 0))
-        for idx, (name, _) in enumerate(games):
-            color = (255, 255, 0) if idx == current else (150, 150, 150)
-            text_surf = font.render(name, True, color)
-            x = 100 + idx * 240
-            y = 160
-            screen.blit(text_surf, (x, y))
-        pygame.display.flip()
+seleccionado = 0
 
-    while True:
-        # Bucle del menú
-        in_menu = True
-        while in_menu:
-            draw_menu()
-            evt = leer_boton()
-            if evt == "LEFT":
-                current = (current - 1) % len(games)
-            elif evt == "RIGHT":
-                current = (current + 1) % len(games)
-            elif evt == "A":
-                in_menu = False
-            pygame.time.wait(100)
+def dibujar_menu():
+    screen.fill((0, 0, 0))
+    for i, juego in enumerate(juegos):
+        color = (255, 255, 0) if i == seleccionado else (200, 200, 200)
+        texto = font.render(juego["nombre"], True, color)
+        rect = texto.get_rect(center=(240 + (i - 0.5) * 200, 120))
+        screen.blit(texto, rect)
+    pygame.display.flip()
 
-        # Preparar ruta y carpeta de trabajo
-        game_relpath = games[current][1]
-        game_folder = os.path.dirname(game_relpath) or "."
-        game_script = os.path.basename(game_relpath)
+def ejecutar_juego(path):
+    try:
+        subprocess.run(["python3", path])
+    except FileNotFoundError:
+        print(f"No se encontró el archivo del juego: {path}")
 
-        full_script_path = os.path.join(game_folder, game_script)
-        if not os.path.exists(full_script_path):
-            print(f"No se encontró el archivo del juego: {full_script_path}")
-            continue
+running = True
+while running:
+    dibujar_menu()
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
 
-        # Lanzar el juego con el directorio de trabajo adecuado
-        proc = subprocess.Popen(["python3", game_script], cwd=game_folder)
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_RIGHT:
+                seleccionado = (seleccionado + 1) % len(juegos)
+            elif event.key == pygame.K_LEFT:
+                seleccionado = (seleccionado - 1) % len(juegos)
+            elif event.key == pygame.K_RETURN:
+                ejecutar_juego(juegos[seleccionado]["path"])
 
-        # Bucle de ejecución del juego
-        running = True
-        while running:
-            evt = leer_boton()
-            retcode = proc.poll()
-            if evt == "MENU":
-                proc.terminate()
-                proc.wait()
-                running = False
-            elif retcode is not None:
-                running = False
-            pygame.time.wait(100)
+    clock.tick(30)
 
-if __name__ == "__main__":
-    main()
+pygame.quit()
+sys.exit()
+
