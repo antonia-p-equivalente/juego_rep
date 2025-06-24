@@ -1,3 +1,4 @@
+pip3 install clock
 import pygame
 from pygame import mixer
 import os, random, csv
