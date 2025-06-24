@@ -1,6 +1,6 @@
 # juego1.py
 import pygame
-from control_usb import leer_boton
+from leerBoton import leer_boton
 
 pygame.init()
 pantalla = pygame.display.set_mode((480, 320))
