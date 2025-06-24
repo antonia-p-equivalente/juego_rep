@@ -2,6 +2,7 @@ import pygame
 import os
 import sys
 import subprocess
+from leerBoton import leer_boton
 
 def main():
     pygame.init()
