@@ -2,56 +2,58 @@ import pygame
 import os
 import sys
 import subprocess
-from leerBoton import leer_boton
+import leerBoton   # <-- nuevo
 
 def main():
     pygame.init()
     screen = pygame.display.set_mode((480, 320))
     pygame.display.set_caption("Menú de Juegos")
-    font = pygame.font.Font(None, 36)  # Tamaño de letra más legible
+    font = pygame.font.Font(None, 36)
     clock = pygame.time.Clock()
 
-    # 1) Definimos la lista de juegos:
-    #    ("Etiqueta visible", "ruta/al/script.py")
     games = [
         ("Anathema", os.path.join("anathema", "anathema_adaptado_botones.py")),
         ("Juego2", "juego2.py"),
-        ("Shooter", os.path.join("Shooter", "JUEGO DISEÑO.py"))
-       
+        ("Shooter", os.path.join("Shooter", "JUEGO DISEÑO.py")),
+        ("MiNuevoJuego", "mi_nuevo_juego.py")
     ]
 
-    current = 0   # Índice de la opción resaltada
+    current = 0
     running = True
 
     while running:
+        clock.tick(30)
+
+        # 1) Leer eventos básicos (solo para cerrar ventana)
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
                 running = False
-            elif e.type == pygame.KEYDOWN:
-                if e.key == pygame.K_DOWN:
-                    current = (current + 1) % len(games)
-                elif e.key == pygame.K_UP:
-                    current = (current - 1) % len(games)
-                elif e.key == pygame.K_RETURN:
-                    # Al presionar Enter lanzamos el script
-                    _, path = games[current]
-                    subprocess.Popen(["python3", path])
-                    running = False
 
-        # 2) Dibujamos fondo negro
+        # 2) Leer botón de hardware (bloquea hasta que sueltas, luego devuelve None)
+        btn = leerBoton.leer_boton()
+
+        # 3) Navegación con botones
+        if btn == 'DOWN':
+            current = (current + 1) % len(games)
+        elif btn == 'UP':
+            current = (current - 1) % len(games)
+        elif btn == 'A':
+            # Lanza el script seleccionado
+            _, path = games[current]
+            subprocess.Popen(["python3", path])
+            running = False
+
+        # 4) Dibujar menú
         screen.fill((0, 0, 0))
-
-        # 3) Recorremos todas las opciones y pintamos el texto
         for idx, (label, _) in enumerate(games):
-            color = (255, 255, 255)                  # Blanco por defecto
-            if idx == current:
-                color = (200, 200, 200)              # Gris claro para seleccionado
-            txt_surf = font.render(label, True, color)
-            screen.blit(txt_surf, (50, 50 + idx * 40))
+            color = (255,255,255) if idx != current else (200,200,200)
+            txt = font.render(label, True, color)
+            screen.blit(txt, (50, 50 + idx * 40))
 
         pygame.display.flip()
-        clock.tick(30)
 
+    # 5) Limpiar GPIO y salir
+    leerBoton.cleanup()
     pygame.quit()
     sys.exit()
 
