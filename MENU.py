@@ -9,7 +9,7 @@ def main():
     pygame.init()
     screen = pygame.display.set_mode((480, 320))
     pygame.display.set_caption("Menú de Juegos")
-    font = pygame.font.Font(None, 50)
+    font = pygame.font.Font(None, 10)
 
     # Lista de juegos: (etiqueta, ruta_relativa_al_script)
     games = [
