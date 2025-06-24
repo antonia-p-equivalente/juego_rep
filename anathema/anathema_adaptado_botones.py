@@ -5,7 +5,7 @@ if __name__ == '__main__':
 import pygame
 from pygame.locals import *
 import sys
-import leerBoton
+from leerBoton import leer_boton
 
 
 
