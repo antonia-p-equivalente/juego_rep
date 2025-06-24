@@ -2,7 +2,7 @@ import pygame
 from pygame import mixer
 import os, random, csv
 import button
-import leerBoton  # <-- nuevo
+from leerBoton import leer_boton  # <-- nuevo
 
 # ... (toda la configuración e inicialización previa queda igual)
 
