@@ -10,8 +10,8 @@ import button                         # tu clase Button
 from leerBoton import leer_boton     # función para leer los botones
 
 # ——— Configuración general ———
-SCREEN_WIDTH  = 800
-SCREEN_HEIGHT = 600
+SCREEN_WIDTH  = 480
+SCREEN_HEIGHT = 320
 BG_COLOR      = (0, 0, 0)
 FPS           = 60
 
